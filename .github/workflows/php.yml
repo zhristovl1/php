@@ -41,7 +41,6 @@ jobs:
           push: true
           target: base
           tags: zlatinl1/php:${{ matrix.version }}-${{ matrix.variant }}
-          platforms: ${{ matrix.platform }}
 
       - name: Build and push php with nodejs support
         uses: docker/build-push-action@v4
@@ -49,9 +48,8 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          target: node
+          target: nodejs
           tags: zlatinl1/php:${{ matrix.version }}-${{ matrix.variant }}
-          platforms: ${{ matrix.platform }}
 
       - name: Build and push php with xdebug support
         uses: docker/build-push-action@v4
@@ -61,4 +59,3 @@ jobs:
           push: true
           target: xdebug
           tags: zlatinl1/php:${{ matrix.version }}-${{ matrix.variant }}
-          platforms: ${{ matrix.platform }}
