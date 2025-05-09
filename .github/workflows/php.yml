@@ -49,7 +49,7 @@ jobs:
           file: Dockerfile
           push: true
           target: nodejs
-          tags: zlatinl1/php:${{ matrix.version }}-${{ matrix.variant }}
+          tags: zlatinl1/php:${{ matrix.version }}-${{ matrix.variant }}-nodejs
 
       - name: Build and push php with xdebug support
         uses: docker/build-push-action@v4
@@ -58,4 +58,4 @@ jobs:
           file: Dockerfile
           push: true
           target: xdebug
-          tags: zlatinl1/php:${{ matrix.version }}-${{ matrix.variant }}
+          tags: zlatinl1/php:${{ matrix.version }}-${{ matrix.variant }}-xdebug
