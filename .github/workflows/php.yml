@@ -1,53 +1,41 @@
-name: Publish docker PHP image for testing purpose only
+name: Build and push Docker images
 
 on:
   push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+    branches:
+      - main
 
 jobs:
-  push_to_registry:
-    name: Push Docker image to Docker Hub
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
-      attestations: write
-      id-token: write
     strategy:
       matrix:
-        variant: ["cli-alpine", "fpm-alpine"]
-        version: ["8.0.30", "8.1.32", "8.2.28"]
+        platform:
+          - linux/arm64/v8
+          - linux/amd64
+
     steps:
-      - name: Check out the repo
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Log in to Docker Hub
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKER_USERNAME }}
+          username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v6
-        with:
-          images: zlatinl1/php:${{ matrix.version }}-${{ matix.version }}
-
-      - name: Build and push Docker image
-        id: push
-        uses: docker/build-push-action@v6
+      - name: Build and push
+        uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./Dockerfile
+          file: Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-
-      - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v2
-        with:
-          subject-name: zlatinl1/php:${{ matrix.version }}-${{ matix.version }}
-          subject-digest: ${{ steps.push.outputs.digest }}
-          push-to-registry: true
+          tags: zlatinl1/php:latest
+          platforms: ${{ matrix.platform }}
