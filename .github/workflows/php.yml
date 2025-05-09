@@ -10,9 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform:
-          - linux/arm64/v8
-          - linux/amd64
+        variant:
+          - cli-alpine
+          - fpm-alpine
+        version:
+          - 8.2.28
 
     steps:
       - name: Checkout code
@@ -31,11 +33,32 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push
+      - name: Build and push base image
         uses: docker/build-push-action@v4
         with:
           context: .
           file: Dockerfile
           push: true
-          tags: zlatinl1/php:latest
+          target: base
+          tags: zlatinl1/php:${{ matrix.version }}-${{ matrix.variant }}
+          platforms: ${{ matrix.platform }}
+
+      - name: Build and push php with nodejs support
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          target: node
+          tags: zlatinl1/php:${{ matrix.version }}-${{ matrix.variant }}
+          platforms: ${{ matrix.platform }}
+
+      - name: Build and push php with xdebug support
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          target: xdebug
+          tags: zlatinl1/php:${{ matrix.version }}-${{ matrix.variant }}
           platforms: ${{ matrix.platform }}
